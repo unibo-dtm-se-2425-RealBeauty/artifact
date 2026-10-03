@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "artifact"
+name = "realbeauty"
 packages = [
     { include = "artifact" },
 ]
 version = "2.4.1"
-description = "A template for Python projects, using Poetry"
-authors = ["Giovanni Ciatto <giovanni.ciatto@unibo.it>"]
+description = "Analyze personal care product ingredients for safety using AI"
+authors = ["Serra Özkasap <serra.ozkasap@studio.unibo.it>"]
 license = "Apache 2.0"
 readme = "README.md"
 
