@@ -44,7 +44,7 @@ Ingredient list:
     response = get_client().chat.completions.create(
         model="nvidia/nemotron-3-ultra-550b-a55b:free",
         messages=[{"role": "user", "content": prompt}],
-        timeout=45,
+        timeout=120,
     )
 
     if not response.choices or response.choices[0].message.content is None:
@@ -75,7 +75,7 @@ def extract_ingredients_from_image(image_bytes: bytes) -> str:
                 ],
             }
         ],
-        timeout=45,
+        timeout=120,
     )
 
     if not response.choices or response.choices[0].message.content is None:
