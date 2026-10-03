@@ -1,3 +1,41 @@
+## 1.0.0 (2026-10-03)
+
+### Features
+
+* add /analyze route for ingredient analysis ([a02d1d4](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/a02d1d4f3af63da0b6464a393e550498344dc730))
+* add /history route to app ([29e305b](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/29e305b7dd9b5d8bfefcd34b114a1bdff739b215))
+* add AI ingredient analyzer using OpenRouter Gemini ([1d9b8c7](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/1d9b8c787b5883fd55f958f10ac1e61cfb2e1a55))
+* add beauty API integration with Open Beauty Facts ([0d2881d](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/0d2881d9328c2099d520fcdd38f29b3988d8fe8b))
+* add Flask app setup and index route ([623cb35](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/623cb35f17bb4a49a8f78510f0b343416007b8c7))
+* add photo upload UI for ingredient extraction ([af00157](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/af001574fab99da4002298e77a18ee72a0dcbc4e))
+* add photo-based ingredient extraction backend ([d149d71](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/d149d7118eb1c4a9afe01bb65fe67de9f2ebc974))
+* add SQLite database layer for caching analyses ([a324137](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/a32413790b1122cd4af543453847b169f180d1b1))
+
+### Bug Fixes
+
+* add manual ingredient fallback when barcode not found ([c070984](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/c0709842038b77494a9caf130a67e4f6e91378f1))
+* create the AI client for tests run without an API key ([f723cee](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/f723cee14f280c7c0a5813e57497a0e5aa6a7a55))
+* handle failures with English error messages ([d82c0d8](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/d82c0d81782c34b14a44816da2121b9f753f4504))
+* use working vision model, add timeout, improve UX with photo clear and auto-reset ([891da72](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/891da720e57887a107ea08b48577c49d1fb293c3))
+
+### Tests
+
+* replace template test with app route tests ([114f5de](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/114f5deee320dfa5dd8d6b76d0210b935cb10985))
+
+### Build and continuous integration
+
+* declare runtime dependencies and require Python 3.10+ ([efd00cc](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/efd00cc4e581f6420dff87f1b8a6548a10aad3c4))
+* drop Python 3.9 from test matrix ([7b06f65](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/7b06f653ebf3d5f1807d000cb840a2393775fac3))
+* rename package to realbeauty for PyPI ([a142435](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/a142435ce1ec9fc309b058bad4955cc19586e328))
+
+### General maintenance
+
+* initialise repository renaming files and removing init workflow [skip ci] ([f12f405](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/f12f40553ad2db5d3fe5291236391a5cb2f125e7))
+
+### Refactoring
+
+* apply ruff formatting and use SQLAlchemy DeclarativeBase ([628b9a6](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/628b9a6898432325940904857b2cc23cc0807eeb))
+
 ## [2.4.1](https://github.com/aequitas-aod/template-python-project-poetry/compare/2.4.0...2.4.1) (2025-12-19)
 
 ### Dependency updates
