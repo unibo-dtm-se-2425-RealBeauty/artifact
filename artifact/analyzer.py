@@ -6,9 +6,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1", api_key=os.getenv("GEMINI_API_KEY")
-)
+
+def get_client() -> OpenAI:
+    return OpenAI(
+        base_url="https://openrouter.ai/api/v1", api_key=os.getenv("GEMINI_API_KEY")
+    )
 
 
 def analyze_ingredients(ingredients_text: str) -> dict:
@@ -39,7 +41,7 @@ Scoring rules:
 Ingredient list:
 {ingredients_text}"""
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model="nvidia/nemotron-3-ultra-550b-a55b:free",
         messages=[{"role": "user", "content": prompt}],
         timeout=45,
@@ -56,7 +58,7 @@ Ingredient list:
 def extract_ingredients_from_image(image_bytes: bytes) -> str:
     b64_image = base64.b64encode(image_bytes).decode("utf-8")
 
-    response = client.chat.completions.create(
+    response = get_client().chat.completions.create(
         model="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
         messages=[
             {
