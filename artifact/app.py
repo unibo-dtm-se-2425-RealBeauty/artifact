@@ -1,4 +1,3 @@
-import json
 from flask import Flask, render_template, request, jsonify
 from artifact.database import init_db, save_analysis, get_history
 from artifact.beauty_api import get_product_by_barcode
@@ -7,9 +6,11 @@ from artifact.analyzer import analyze_ingredients, extract_ingredients_from_imag
 app = Flask(__name__, template_folder="../templates")
 init_db()
 
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
@@ -28,24 +29,39 @@ def analyze():
             product_name = product["name"]
             brand = product["brand"]
         elif not manual_ingredients:
-            return jsonify({
-                "error": "not_found",
-                "message": "Ürün bulunamadı. Lütfen içerik listesini elle girin."
-            }), 404
+            return jsonify(
+                {
+                    "error": "not_found",
+                    "message": "Product not found. Please enter the ingredients manually.",
+                }
+            ), 404
 
     if not ingredients_text:
         return jsonify({"error": "Please provide a barcode or ingredients"}), 400
-    result = analyze_ingredients(ingredients_text)
+
+    try:
+        result = analyze_ingredients(ingredients_text)
+    except Exception:
+        return jsonify(
+            {
+                "error": "ai_failed",
+                "message": "AI analysis is temporarily unavailable. Please try again in a moment.",
+            }
+        ), 503
+
     save_analysis(barcode, product_name, brand, ingredients_text, result)
 
-    return jsonify({
-        "product_name": product_name,
-        "brand": brand,
-        "score": result["score"],
-        "summary": result["summary"],
-        "flagged": result["flagged"],
-        "safe_highlights": result["safe_highlights"]
-    })
+    return jsonify(
+        {
+            "product_name": product_name,
+            "brand": brand,
+            "score": result["score"],
+            "summary": result["summary"],
+            "flagged": result["flagged"],
+            "safe_highlights": result["safe_highlights"],
+        }
+    )
+
 
 @app.route("/analyze-photo", methods=["POST"])
 def analyze_photo():
@@ -54,32 +70,58 @@ def analyze_photo():
         return jsonify({"error": "No photo provided"}), 400
 
     image_bytes = photo.read()
-    ingredients_text = extract_ingredients_from_image(image_bytes)
+
+    try:
+        ingredients_text = extract_ingredients_from_image(image_bytes)
+    except Exception:
+        return jsonify(
+            {
+                "error": "ai_failed",
+                "message": "AI analysis is temporarily unavailable. Please try again in a moment.",
+            }
+        ), 503
 
     if not ingredients_text:
         return jsonify({"error": "Could not read ingredients from photo"}), 422
 
-    result = analyze_ingredients(ingredients_text)
+    try:
+        result = analyze_ingredients(ingredients_text)
+    except Exception:
+        return jsonify(
+            {
+                "error": "ai_failed",
+                "message": "AI analysis is temporarily unavailable. Please try again in a moment.",
+            }
+        ), 503
+
     save_analysis(None, "Photo Entry", "Unknown", ingredients_text, result)
 
-    return jsonify({
-        "product_name": "Photo Entry",
-        "brand": "Unknown",
-        "score": result["score"],
-        "summary": result["summary"],
-        "flagged": result["flagged"],
-        "safe_highlights": result["safe_highlights"]
-    })
+    return jsonify(
+        {
+            "product_name": "Photo Entry",
+            "brand": "Unknown",
+            "score": result["score"],
+            "summary": result["summary"],
+            "flagged": result["flagged"],
+            "safe_highlights": result["safe_highlights"],
+        }
+    )
+
 
 @app.route("/history")
 def history():
     analyses = get_history()
-    return jsonify([{
-        "id": a.id,
-        "barcode": a.barcode,
-        "product_name": a.product_name,
-        "brand": a.brand,
-        "score": a.score,
-        "summary": a.summary,
-        "created_at": a.created_at.isoformat()
-    } for a in analyses])
+    return jsonify(
+        [
+            {
+                "id": a.id,
+                "barcode": a.barcode,
+                "product_name": a.product_name,
+                "brand": a.brand,
+                "score": a.score,
+                "summary": a.summary,
+                "created_at": a.created_at.isoformat(),
+            }
+            for a in analyses
+        ]
+    )
