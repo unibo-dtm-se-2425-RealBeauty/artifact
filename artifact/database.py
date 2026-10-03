@@ -1,14 +1,20 @@
 import os
 from datetime import datetime
 from sqlalchemy import create_engine, Column, String, Integer, Text, DateTime
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", "realbeauty.db")
 
 engine = create_engine(f"sqlite:///{DB_PATH}")
-Base = declarative_base()
+
+
+class Base(DeclarativeBase):
+    pass
+
+
 Session = sessionmaker(bind=engine)
+
 
 class Analysis(Base):
     __tablename__ = "analyses"
@@ -24,8 +30,10 @@ class Analysis(Base):
     safe_highlights_json = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+
 def init_db():
     Base.metadata.create_all(engine)
+
 
 def save_analysis(barcode, product_name, brand, ingredients_text, result):
     session = Session()
@@ -37,11 +45,12 @@ def save_analysis(barcode, product_name, brand, ingredients_text, result):
         score=result["score"],
         summary=result["summary"],
         flagged_json=str(result["flagged"]),
-        safe_highlights_json=str(result["safe_highlights"])
+        safe_highlights_json=str(result["safe_highlights"]),
     )
     session.add(analysis)
     session.commit()
     session.close()
+
 
 def get_history():
     session = Session()

@@ -7,8 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("GEMINI_API_KEY")
+    base_url="https://openrouter.ai/api/v1", api_key=os.getenv("GEMINI_API_KEY")
 )
 
 
@@ -43,7 +42,7 @@ Ingredient list:
     response = client.chat.completions.create(
         model="nvidia/nemotron-3-ultra-550b-a55b:free",
         messages=[{"role": "user", "content": prompt}],
-        timeout=45
+        timeout=45,
     )
 
     if not response.choices or response.choices[0].message.content is None:
@@ -65,16 +64,16 @@ def extract_ingredients_from_image(image_bytes: bytes) -> str:
                 "content": [
                     {
                         "type": "text",
-                        "text": "This image shows the ingredient list of a personal care product. Return ONLY the ingredient list as plain comma-separated text, with no explanation or extra formatting."
+                        "text": "This image shows the ingredient list of a personal care product. Return ONLY the ingredient list as plain comma-separated text, with no explanation or extra formatting.",
                     },
                     {
                         "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{b64_image}"}
-                    }
-                ]
+                        "image_url": {"url": f"data:image/jpeg;base64,{b64_image}"},
+                    },
+                ],
             }
         ],
-        timeout=45
+        timeout=45,
     )
 
     if not response.choices or response.choices[0].message.content is None:
