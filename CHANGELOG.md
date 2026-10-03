@@ -1,3 +1,13 @@
+## [1.1.0](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/compare/1.0.0...1.1.0) (2026-10-03)
+
+### Features
+
+* version the HTTP API under /api/v1 and log AI failures ([49aea6f](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/49aea6f5307ac19bd73d2919f27faa11f10ea024))
+
+### Bug Fixes
+
+* raise AI request timeout to 120 seconds ([336a8cb](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/commit/336a8cb67f1545e68c46d0b5722774ebf0aba199))
+
 ## 1.0.0 (2026-10-03)
 
 ### Features
