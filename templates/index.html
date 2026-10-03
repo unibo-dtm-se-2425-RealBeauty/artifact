@@ -100,7 +100,7 @@
         <div id="loading">
             ⏳ Analyzing ingredients...
             <div class="progress-track"><div class="progress-fill"></div></div>
-            <div id="loading-timer">0s elapsed — free AI models can take up to 45s</div>
+            <div id="loading-timer">0s elapsed — free AI models can take up to 2 minutes</div>
         </div>
 
         <div class="card" id="result">
@@ -135,10 +135,10 @@
         function startLoadingTimer() {
             let seconds = 0;
             const timerEl = document.getElementById("loading-timer");
-            timerEl.textContent = "0s elapsed — free AI models can take up to 45s";
+            timerEl.textContent = "0s elapsed — free AI models can take up to 2 minutes";
             loadingInterval = setInterval(() => {
                 seconds++;
-                timerEl.textContent = `${seconds}s elapsed — free AI models can take up to 45s`;
+                timerEl.textContent = `${seconds}s elapsed — free AI models can take up to 2 minutes`;
             }, 1000);
         }
 
@@ -198,7 +198,7 @@
             startLoadingTimer();
 
             try {
-                const res = await fetch("/analyze", {
+                const res = await fetch("/api/v1/analyze", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ barcode, ingredients })
@@ -245,7 +245,7 @@
             formData.append("photo", file);
 
             try {
-                const res = await fetch("/analyze-photo", {
+                const res = await fetch("/api/v1/analyze-photo", {
                     method: "POST",
                     body: formData
                 });

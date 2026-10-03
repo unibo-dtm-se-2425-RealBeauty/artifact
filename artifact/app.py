@@ -1,18 +1,19 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Blueprint, Flask, render_template, request, jsonify
 from artifact.database import init_db, save_analysis, get_history
 from artifact.beauty_api import get_product_by_barcode
 from artifact.analyzer import analyze_ingredients, extract_ingredients_from_image
 
 app = Flask(__name__, template_folder="../templates")
 init_db()
+api_v1 = Blueprint("api_v1", __name__, url_prefix="/api/v1")
 
 
-@app.route("/")
+@app.route("/")  # main page
 def index():
     return render_template("index.html")
 
 
-@app.route("/analyze", methods=["POST"])
+@api_v1.route("/analyze", methods=["POST"])
 def analyze():
     data = request.get_json()
     barcode = data.get("barcode", "").strip()
@@ -42,6 +43,7 @@ def analyze():
     try:
         result = analyze_ingredients(ingredients_text)
     except Exception:
+        app.logger.exception("AI call failed")
         return jsonify(
             {
                 "error": "ai_failed",
@@ -63,7 +65,7 @@ def analyze():
     )
 
 
-@app.route("/analyze-photo", methods=["POST"])
+@api_v1.route("/analyze-photo", methods=["POST"])
 def analyze_photo():
     photo = request.files.get("photo")
     if not photo:
@@ -74,6 +76,7 @@ def analyze_photo():
     try:
         ingredients_text = extract_ingredients_from_image(image_bytes)
     except Exception:
+        app.logger.exception("AI call failed")
         return jsonify(
             {
                 "error": "ai_failed",
@@ -87,6 +90,7 @@ def analyze_photo():
     try:
         result = analyze_ingredients(ingredients_text)
     except Exception:
+        app.logger.exception("AI call failed")
         return jsonify(
             {
                 "error": "ai_failed",
@@ -108,7 +112,7 @@ def analyze_photo():
     )
 
 
-@app.route("/history")
+@api_v1.route("/history", methods=["GET"])
 def history():
     analyses = get_history()
     return jsonify(
@@ -125,3 +129,8 @@ def history():
             for a in analyses
         ]
     )
+
+
+app.register_blueprint(
+    api_v1
+)  # this one has to comes after all routes toavoid Flask error
