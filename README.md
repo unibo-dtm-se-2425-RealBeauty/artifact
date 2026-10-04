@@ -1,13 +1,13 @@
 # RealBeauty
 
-[![CI/CD](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/actions/workflows/check.yml/badge.svg)](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/actions/workflows/check.yml)
+[![CI/CD](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/actions/workflows/check.yml/badge.svg)](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/actions/workflows/check.yml)
 [![PyPI](https://img.shields.io/pypi/v/realbeauty)](https://pypi.org/project/realbeauty/)
 
 **Know what's really inside your personal care products.**
 
 RealBeauty is a small Flask web application that analyses the ingredient list of a cosmetic or personal care product. It returns a safety score, flags concerning ingredients with a severity level, and highlights beneficial ones.
 
-It was developed as the project work for the Software Engineering course (University of Bologna, DTM, 2025/26). The full process description (requirements, design, validation, release, etc.) is in the report, which lives in the `report` repository of this GitHub organization.
+It was developed as the project work for the Software Engineering course (University of Bologna, DTM, 2024/25). The full process description (requirements, design, validation, release, etc.) is in the report, which lives in the `report` repository of this GitHub organization.
 
 ## Features
 
@@ -64,7 +64,7 @@ The code is split by responsibility: `beauty_api.py` talks to Open Beauty Facts,
 ## Getting started
 
 ```bash
-git clone https://github.com/unibo-dtm-se-2526-RealBeauty/artifact.git
+git clone https://github.com/unibo-dtm-se-2425-RealBeauty/artifact.git
 cd artifact
 poetry install
 ```
