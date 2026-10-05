@@ -1,3 +1,19 @@
+## [1.2.0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.1.0...1.2.0) (2026-10-05)
+
+### Features
+
+* show the safety score out of 100 ([ae08894](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/ae08894003a8cd70eab676de4a06f7829ecf0865))
+
+### Bug Fixes
+
+* read ingredients from language-specific fields and default missing product names ([e373c0d](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/e373c0d7170d983f0fef0f2ec4228eea4a7b00d9))
+* retry when the AI provider is overloaded and report the real error ([5ac4352](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/5ac4352a9e09b5993a491c416486fe183d2cd354))
+
+### Documentation
+
+* rewrite README for RealBeauty ([bbc303c](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/bbc303cb090a37892d2dbb72179fbb506e486cb9))
+* update organization name in README links ([db25166](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/db2516628626d1fa80dd02e18cd6fa16ba29c19e))
+
 ## [1.1.0](https://github.com/unibo-dtm-se-2526-RealBeauty/artifact/compare/1.0.0...1.1.0) (2026-10-03)
 
 ### Features
