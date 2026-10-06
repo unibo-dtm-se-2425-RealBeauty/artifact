@@ -1,3 +1,9 @@
+## [1.2.1](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.2.0...1.2.1) (2026-10-06)
+
+### Bug Fixes
+
+* fall back to alternative free models and detect the real image type ([5c65d04](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/5c65d04c161def8a29be383d33aa285dc185f623))
+
 ## [1.2.0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.1.0...1.2.0) (2026-10-05)
 
 ### Features
