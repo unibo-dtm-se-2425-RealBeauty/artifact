@@ -158,13 +158,13 @@ To enable releases on a new repository, add two repository secrets: `RELEASE_TOK
 
 ## Validation summary
 
-- **Automated tests:** pytest tests for the web routes, with the AI and the database mocked; line coverage is over 80%, measured with `coverage`.
+- **Automated tests:** pytest tests for the web routes, the Open Beauty Facts client and the AI client (retries and model fallback), with the network, the AI and the database mocked; line coverage is over 90%, measured with `coverage`.
 - **Manual acceptance testing:** the application was exercised through the web interface with real ingredient lists, including error cases such as an unknown barcode and an unavailable AI service.
 
 ## Known limitations
 
 - Open Beauty Facts is community-maintained: many products, or their ingredient lists, are missing, and the same product has different barcodes in different countries.
-- The free AI models are slow and sometimes unreliable; photo analysis can occasionally fail with an empty answer from the vision model.
+- The free AI models are slow and sometimes overloaded. The application retries and falls back to alternative free models, but an analysis can still fail when all of them are busy; in that case the user is asked to try again later.
 - Results are AI-generated and depend on the model used.
 
 ## License
