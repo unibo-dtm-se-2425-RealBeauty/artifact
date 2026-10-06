@@ -9,11 +9,20 @@ from openai import OpenAI
 
 load_dotenv()
 
-TEXT_MODEL = "nvidia/nemotron-3-ultra-550b-a55b:free"
-VISION_MODEL = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free"
+# Free models are tried in order: when one provider is overloaded we move on to the next.
+TEXT_MODELS = [
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+]
+VISION_MODELS = [
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+]
 REQUEST_TIMEOUT = 120
-MAX_ATTEMPTS = 3
-RETRY_DELAY_SECONDS = 3
+ATTEMPTS_PER_MODEL = 2
+RETRY_DELAY_SECONDS = 2
 
 
 def get_client() -> OpenAI:
@@ -35,20 +44,30 @@ def _describe_error(response: Any) -> str:
     return "empty response"
 
 
-def _complete(model: str, messages: Any) -> str:
-    """Call the model, retrying when the free provider is overloaded or answers empty."""
+def _complete(models: list[str], messages: Any) -> str:
+    """Ask the models in order, retrying each when the free provider is overloaded or empty."""
     last_error = "empty response"
-    for attempt in range(MAX_ATTEMPTS):
-        response = get_client().chat.completions.create(
-            model=model, messages=messages, timeout=REQUEST_TIMEOUT
-        )
-        content = response.choices[0].message.content if response.choices else None
-        if content and content.strip():
-            return content
-        last_error = _describe_error(response)
-        if attempt < MAX_ATTEMPTS - 1:
-            time.sleep(RETRY_DELAY_SECONDS * (attempt + 1))
-    raise RuntimeError(f"AI model gave no usable answer ({last_error}).")
+    for model in models:
+        for attempt in range(ATTEMPTS_PER_MODEL):
+            response = get_client().chat.completions.create(
+                model=model, messages=messages, timeout=REQUEST_TIMEOUT
+            )
+            content = response.choices[0].message.content if response.choices else None
+            if content and content.strip():
+                return content
+            last_error = f"{model}: {_describe_error(response)}"
+            if attempt < ATTEMPTS_PER_MODEL - 1:
+                time.sleep(RETRY_DELAY_SECONDS)
+    raise RuntimeError(f"No AI model gave a usable answer (last error: {last_error}).")
+
+
+def _detect_mime_type(image_bytes: bytes) -> str:
+    """Read the real image format from the first bytes; default to JPEG."""
+    if image_bytes.startswith(b"\x89PNG"):
+        return "image/png"
+    if image_bytes[:4] == b"RIFF" and image_bytes[8:12] == b"WEBP":
+        return "image/webp"
+    return "image/jpeg"
 
 
 def analyze_ingredients(ingredients_text: str) -> dict:
@@ -79,7 +98,7 @@ Scoring rules:
 Ingredient list:
 {ingredients_text}"""
 
-    raw = _complete(TEXT_MODEL, [{"role": "user", "content": prompt}])
+    raw = _complete(TEXT_MODELS, [{"role": "user", "content": prompt}])
     clean = raw.replace("```json", "").replace("```", "").strip()
     return json.loads(clean)
 
@@ -96,9 +115,11 @@ def extract_ingredients_from_image(image_bytes: bytes) -> str:
                 },
                 {
                     "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{b64_image}"},
+                    "image_url": {
+                        "url": f"data:{_detect_mime_type(image_bytes)};base64,{b64_image}"
+                    },
                 },
             ],
         }
     ]
-    return _complete(VISION_MODEL, messages).strip()
+    return _complete(VISION_MODELS, messages).strip()
