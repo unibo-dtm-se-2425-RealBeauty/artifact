@@ -1,6 +1,9 @@
+import ast
+import json
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, Column, String, Integer, Text, DateTime
+
+from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine, func
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -35,17 +38,22 @@ def init_db():
     Base.metadata.create_all(engine)
 
 
+def normalize_ingredients(text):
+    """Remove extra spaces and line breaks, so the same list is stored the same way."""
+    return " ".join(text.split())
+
+
 def save_analysis(barcode, product_name, brand, ingredients_text, result):
     session = Session()
     analysis = Analysis(
         barcode=barcode,
         product_name=product_name,
         brand=brand,
-        ingredients_text=ingredients_text,
+        ingredients_text=normalize_ingredients(ingredients_text),
         score=result["score"],
         summary=result["summary"],
-        flagged_json=str(result["flagged"]),
-        safe_highlights_json=str(result["safe_highlights"]),
+        flagged_json=json.dumps(result["flagged"]),
+        safe_highlights_json=json.dumps(result["safe_highlights"]),
     )
     session.add(analysis)
     session.commit()
@@ -57,3 +65,37 @@ def get_history():
     analyses = session.query(Analysis).order_by(Analysis.created_at.desc()).all()
     session.close()
     return analyses
+
+
+def parse_list(text):
+    """Read a saved list. Old rows used Python's str() instead of JSON."""
+    try:
+        return json.loads(text)
+    except (TypeError, ValueError):
+        return ast.literal_eval(text)  # safe: only reads plain Python values
+
+
+def find_cached_analysis(ingredients_text):
+    """Return a saved result for the same ingredient list, or None."""
+    session = Session()
+    analysis = (
+        session.query(Analysis)
+        .filter(  # compare without caring about upper or lower case
+            func.lower(Analysis.ingredients_text)
+            == normalize_ingredients(ingredients_text).lower()
+        )
+        .order_by(Analysis.created_at.desc())
+        .first()
+    )
+    session.close()
+    if analysis is None:
+        return None
+    try:
+        return {
+            "score": analysis.score,
+            "summary": analysis.summary,
+            "flagged": parse_list(analysis.flagged_json),
+            "safe_highlights": parse_list(analysis.safe_highlights_json),
+        }
+    except (TypeError, ValueError, SyntaxError):
+        return None  # unreadable row: analyse again instead
