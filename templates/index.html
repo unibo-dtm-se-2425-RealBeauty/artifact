@@ -71,6 +71,17 @@
             cursor: pointer;
         }
         .clear-photo-btn:hover { background: #ddd; color: #555; }
+        #cached-note { display: none; background: #f2f2f2; color: #666; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; }
+        .history-card { border: 1px solid #eee; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+        .history-card:last-child { margin-bottom: 0; }
+        .history-top { display: flex; align-items: center; gap: 12px; }
+        .history-score { min-width: 48px; padding: 6px 0; border-radius: 20px; color: white; font-weight: bold; text-align: center; }
+        .history-title { flex: 1; min-width: 0; }
+        .history-sub { color: #888; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .method-tag { display: inline-block; background: #f3ebe7; color: #a96d55; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; margin-bottom: 4px; }
+        .history-summary { font-size: 0.88rem; color: #555; margin-top: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .history-facts { font-size: 0.85rem; color: #555; margin-top: 8px; line-height: 1.5; }
+        .history-card button { margin-top: 10px; padding: 7px 16px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -107,6 +118,7 @@
         <div class="card" id="result">
             <h2 id="product-name"></h2>
             <p id="brand" style="color:#888; margin-bottom:16px;"></p>
+            <div id="cached-note"></div>
             <div id="score-circle" class="score-circle"></div>
             <p id="summary" style="text-align:center; margin-bottom:20px;"></p>
 
@@ -115,6 +127,12 @@
 
             <h3>✅ Safe Highlights</h3>
             <div id="safe-list" style="margin-top: 10px;"></div>
+        </div>
+
+        <div class="card">
+            <h2>Recent Analyses</h2>
+            <p style="color:#888; font-size:0.9rem; margin: 4px 0 12px;">Products analysed before, with a short summary of each result.</p>
+            <div id="history-list"><p style="color:#888">No analyses yet.</p></div>
         </div>
     </div>
 
@@ -130,6 +148,8 @@
             photoInput.value = "";
             clearPhotoBtn.style.display = "none";
         }
+
+        loadHistory();
 
         let loadingInterval = null;
 
@@ -156,14 +176,86 @@
             clearPhoto();
         }
 
-        function displayResult(data) {
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text ?? "";
+            return div.innerHTML;
+        }
+
+        function scoreClass(score) {
+            return score >= 70 ? "score-good" : score >= 40 ? "score-medium" : "score-bad";
+        }
+
+        const METHODS = {
+            barcode: "▮▮ Barcode",
+            manual: "✍️ Manual entry",
+            photo: "📷 Photo",
+        };
+        let historyItems = [];
+
+        function namesOf(flagged, severity) {
+            return flagged.filter(f => f.severity === severity).map(f => f.name);
+        }
+
+        function historyCard(a, index) {
+            const subtitle = a.method === "barcode"
+                ? `${a.brand} · ${a.barcode}`
+                : `${a.ingredients_preview}…`;
+            const high = namesOf(a.flagged, "high");
+            const counts = ["high", "medium", "low"]
+                .map(sev => `${namesOf(a.flagged, sev).length} ${sev}`).join(" · ");
+            return `
+                <div class="history-card">
+                    <div class="history-top">
+                        <span class="history-score ${scoreClass(a.score)}">${Number(a.score)}</span>
+                        <div class="history-title">
+                            <span class="method-tag">${METHODS[a.method] || ""}</span><br>
+                            <strong>${escapeHtml(a.product_name)}</strong>
+                            <div class="history-sub">${escapeHtml(subtitle)}</div>
+                        </div>
+                    </div>
+                    <p class="history-summary">${escapeHtml(a.summary)}</p>
+                    <div class="history-facts">
+                        ⚠️ Flagged: ${counts}<br>
+                        ${high.length ? `🔴 High risk: ${escapeHtml(high.join(", "))}<br>` : ""}
+                        ${a.safe_highlights.length ? `✅ Safe: ${escapeHtml(a.safe_highlights.join(", "))}` : ""}
+                    </div>
+                    <button type="button" onclick="showHistoryDetails(${index})">Show details</button>
+                </div>`;
+        }
+
+        async function loadHistory() {
+            const list = document.getElementById("history-list");
+            try {
+                const res = await fetch("/api/v1/history");
+                if (!res.ok) return;
+                historyItems = (await res.json()).slice(0, 10);
+                list.innerHTML = historyItems.length === 0
+                    ? "<p style='color:#888'>No analyses yet.</p>"
+                    : historyItems.map(historyCard).join("");
+            } catch (e) {
+                // history is optional: keep the page working if it cannot be loaded
+            }
+        }
+
+        function showHistoryDetails(index) {
+            displayResult(historyItems[index], "ℹ️ Saved result from your history.", false);
+        }
+
+        function displayResult(data, note = null, fromForm = true) {
             document.getElementById("product-name").textContent = data.product_name;
             document.getElementById("brand").textContent = data.brand;
             document.getElementById("summary").textContent = data.summary;
 
             const circle = document.getElementById("score-circle");
             circle.innerHTML = `${Number(data.score)}<small>/ 100</small>`;
-            circle.className = "score-circle " + (data.score >= 70 ? "score-good" : data.score >= 40 ? "score-medium" : "score-bad");
+            circle.className = "score-circle " + scoreClass(data.score);
+            if (data.cached) {
+                note = "ℹ️ Saved result: this ingredient list was analysed before, so no new AI analysis was needed.";
+            }
+            const noteEl = document.getElementById("cached-note");
+            noteEl.textContent = note || "";
+            noteEl.style.display = note ? "block" : "none";
 
             const flaggedList = document.getElementById("flagged-list");
             const sorted = [...data.flagged].sort((a, b) => {
@@ -182,8 +274,13 @@
             safeList.innerHTML = data.safe_highlights.length === 0 ? "<p style='color:#888'>None identified</p>" :
                 data.safe_highlights.map(s => `<span class="safe-tag">✓ ${s}</span>`).join("");
 
-            document.getElementById("result").style.display = "block";
-            clearAllInputs();
+            const resultCard = document.getElementById("result");
+            resultCard.style.display = "block";
+            resultCard.scrollIntoView({ behavior: "smooth", block: "start" });
+            if (fromForm) {
+                clearAllInputs();
+                loadHistory();
+            }
         }
 
         async function analyze() {
