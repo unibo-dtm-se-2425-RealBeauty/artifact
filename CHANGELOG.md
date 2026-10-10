@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.3.0...1.3.1) (2026-10-10)
+
+### Bug Fixes
+
+* show each product once in the history, with its newest result ([c90bc69](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/c90bc69bcdc7082e99823622da7777a09af89574))
+* show the history as compact rows that open one at a time ([70ed0a3](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/70ed0a3a34703002c22e9d6b158f746d203a9546))
+
 ## [1.3.0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.2.1...1.3.0) (2026-10-10)
 
 ### Features
