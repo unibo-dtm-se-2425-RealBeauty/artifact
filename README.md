@@ -16,7 +16,7 @@ It was developed as the project work for the Software Engineering course (Univer
   - an **ingredient list** pasted manually (also the fallback when a barcode is not found);
   - a **photo of the label**, from which the ingredient list is extracted by a vision model.
 - **AI-based analysis** (through [OpenRouter](https://openrouter.ai/)): a score from 0 to 100, a short summary, flagged ingredients (high / medium / low severity) and safe highlights.
-- **History**: every analysis is stored in a local SQLite database and can be listed through the API.
+- **History and saved results**: every analysis is stored in a local SQLite database. The page lists past analyses (one row per product, with a short summary and a "Show details" button), and an ingredient list that was already analysed gets its saved result back at once, without a new AI call.
 - **Versioned HTTP API** under `/api/v1`.
 
 ### How the score works
@@ -121,7 +121,8 @@ A successful analysis returns:
   "score": 100,
   "summary": "…",
   "flagged": [{"name": "…", "reason": "…", "severity": "low"}],
-  "safe_highlights": ["Glycerin"]
+  "safe_highlights": ["Glycerin"],
+  "cached": false
 }
 ```
 
@@ -158,14 +159,15 @@ To enable releases on a new repository, add two repository secrets: `RELEASE_TOK
 
 ## Validation summary
 
-- **Automated tests:** pytest tests for the web routes, the Open Beauty Facts client and the AI client (retries and model fallback), with the network, the AI and the database mocked; line coverage is over 90%, measured with `coverage`.
+- **Automated tests:** 33 pytest tests for the web routes, the Open Beauty Facts client, the AI client (retries and model fallback) and the database (run against a temporary in-memory SQLite database); the network and the AI are always mocked. Line coverage is 97%, measured with `coverage`.
 - **Manual acceptance testing:** the application was exercised through the web interface with real ingredient lists, including error cases such as an unknown barcode and an unavailable AI service.
 
 ## Known limitations
 
 - Open Beauty Facts is community-maintained: many products, or their ingredient lists, are missing, and the same product has different barcodes in different countries.
 - The free AI models are slow and sometimes overloaded. The application retries and falls back to alternative free models, but an analysis can still fail when all of them are busy; in that case the user is asked to try again later.
-- Results are AI-generated and depend on the model used.
+- Results are AI-generated and depend on the model used. A saved result is reused for the same ingredient list, so the score stays stable, but saved results do not expire when the prompt or the models change.
+- Saved results are found by ingredient list, so label photos (whose text can differ by a letter between photos) find them less often than barcodes and typed lists.
 
 ## License
 
