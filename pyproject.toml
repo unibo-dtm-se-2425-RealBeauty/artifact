@@ -3,7 +3,7 @@ name = "realbeauty"
 packages = [
     { include = "artifact" },
 ]
-version = "1.2.1"
+version = "1.3.0"
 description = "Analyze personal care product ingredients for safety using AI"
 authors = ["Serra Özkasap <serra.ozkasap@studio.unibo.it>"]
 license = "Apache 2.0"

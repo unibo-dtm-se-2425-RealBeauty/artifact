@@ -1,3 +1,15 @@
+## [1.3.0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.2.1...1.3.0) (2026-10-10)
+
+### Features
+
+* find saved analyses for the same ingredient list ([f93aa6d](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/f93aa6dd9704e9c8dc0e06c39a5c044742b5b2ca))
+* reuse saved results instead of calling the AI again ([0a5b97d](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/0a5b97d3a7e96c5d068b01f5ff2aa7ad86bb7c3d))
+* show past analyses as summary cards ([96a5b05](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/96a5b0512b204d4b578389e4c8fac7e9ffbd5163))
+
+### Documentation
+
+* update validation summary and known limitations ([0d6fbf0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/0d6fbf0311470b8be5f237ec221771169b1e7486))
+
 ## [1.2.1](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.2.0...1.2.1) (2026-10-06)
 
 ### Bug Fixes
