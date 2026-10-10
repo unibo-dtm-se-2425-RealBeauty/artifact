@@ -6,6 +6,7 @@ from artifact.database import (
     find_cached_analysis,
     get_history,
     init_db,
+    normalize_ingredients,
     parse_list,
     save_analysis,
 )
@@ -131,9 +132,21 @@ def safe_list(text):
         return []
 
 
+def latest_per_product(analyses):
+    """Keep only the newest analysis of each ingredient list (the one the cache reuses)."""
+    seen = set()
+    latest = []
+    for analysis in analyses:  # get_history() returns the newest first
+        key = normalize_ingredients(analysis.ingredients_text or "").lower()
+        if key not in seen:
+            seen.add(key)
+            latest.append(analysis)
+    return latest
+
+
 @api_v1.route("/history", methods=["GET"])
 def history():
-    analyses = get_history()
+    analyses = latest_per_product(get_history())
     return jsonify(
         [
             {

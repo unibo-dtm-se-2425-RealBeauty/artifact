@@ -166,7 +166,7 @@ def test_history_shows_method_for_photo_and_manual(mock_history):
             barcode=None,
             product_name=product_name,
             brand="Unknown",
-            ingredients_text="Aqua",
+            ingredients_text=f"Aqua, {product_name}",
             score=50,
             summary="Ok.",
             flagged_json="not a list",  # unreadable: shown as empty
@@ -178,3 +178,25 @@ def test_history_shows_method_for_photo_and_manual(mock_history):
     data = make_client().get("/api/v1/history").get_json()
     assert [item["method"] for item in data] == ["photo", "manual"]
     assert data[0]["flagged"] == []
+
+
+@patch("artifact.app.get_history")
+def test_history_shows_each_product_once(mock_history):
+    def row(score, text):
+        return SimpleNamespace(
+            id=score,
+            barcode="4005900008985",
+            product_name="Nivea",
+            brand="",
+            ingredients_text=text,
+            score=score,
+            summary="Ok.",
+            flagged_json="[]",
+            safe_highlights_json="[]",
+            created_at=datetime(2026, 10, 5),
+        )
+
+    # newest first, as get_history() returns them
+    mock_history.return_value = [row(7, "Aqua, Glycerin"), row(10, "aqua,  glycerin")]
+    data = make_client().get("/api/v1/history").get_json()
+    assert [item["score"] for item in data] == [7]
