@@ -72,16 +72,21 @@
         }
         .clear-photo-btn:hover { background: #ddd; color: #555; }
         #cached-note { display: none; background: #f2f2f2; color: #666; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; text-align: center; }
-        .history-card { border: 1px solid #eee; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
-        .history-card:last-child { margin-bottom: 0; }
-        .history-top { display: flex; align-items: center; gap: 12px; }
-        .history-score { min-width: 48px; padding: 6px 0; border-radius: 20px; color: white; font-weight: bold; text-align: center; }
+        .history-card { border-bottom: 1px solid #f0f0f0; }
+        .history-card:last-child { border-bottom: none; }
+        .history-top { display: flex; align-items: center; gap: 12px; padding: 10px 4px; cursor: pointer; border-radius: 8px; }
+        .history-top:hover { background: #faf6f3; }
+        .history-score { min-width: 44px; padding: 4px 0; border-radius: 20px; color: white; font-weight: bold; text-align: center; font-size: 0.9rem; }
         .history-title { flex: 1; min-width: 0; }
-        .history-sub { color: #888; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .method-tag { display: inline-block; background: #f3ebe7; color: #a96d55; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; margin-bottom: 4px; }
-        .history-summary { font-size: 0.88rem; color: #555; margin-top: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .history-sub { color: #888; font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .method-tag { display: inline-block; background: #f3ebe7; color: #a96d55; padding: 1px 8px; border-radius: 20px; font-size: 0.72rem; margin-left: 6px; vertical-align: middle; }
+        .history-arrow { color: #bbb; transition: transform 0.2s; }
+        .history-card.open .history-arrow { transform: rotate(180deg); }
+        .history-body { display: none; padding: 0 4px 14px 60px; }
+        .history-card.open .history-body { display: block; }
+        .history-summary { font-size: 0.88rem; color: #555; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .history-facts { font-size: 0.85rem; color: #555; margin-top: 8px; line-height: 1.5; }
-        .history-card button { margin-top: 10px; padding: 7px 16px; font-size: 0.9rem; }
+        .history-body button { margin-top: 10px; padding: 7px 16px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -131,7 +136,7 @@
 
         <div class="card">
             <h2>Recent Analyses</h2>
-            <p style="color:#888; font-size:0.9rem; margin: 4px 0 12px;">Products analysed before, with a short summary of each result.</p>
+            <p style="color:#888; font-size:0.9rem; margin: 4px 0 12px;">Products analysed before. Click a row for a short summary.</p>
             <div id="history-list"><p style="color:#888">No analyses yet.</p></div>
         </div>
     </div>
@@ -199,29 +204,38 @@
 
         function historyCard(a, index) {
             const subtitle = a.method === "barcode"
-                ? `${a.brand} · ${a.barcode}`
+                ? [a.brand, a.barcode].filter(Boolean).join(" · ")
                 : `${a.ingredients_preview}…`;
             const high = namesOf(a.flagged, "high");
             const counts = ["high", "medium", "low"]
                 .map(sev => `${namesOf(a.flagged, sev).length} ${sev}`).join(" · ");
             return `
-                <div class="history-card">
-                    <div class="history-top">
+                <div class="history-card" id="history-${index}">
+                    <div class="history-top" onclick="toggleHistory(${index})">
                         <span class="history-score ${scoreClass(a.score)}">${Number(a.score)}</span>
                         <div class="history-title">
-                            <span class="method-tag">${METHODS[a.method] || ""}</span><br>
-                            <strong>${escapeHtml(a.product_name)}</strong>
+                            <strong>${escapeHtml(a.product_name)}</strong><span class="method-tag">${METHODS[a.method] || ""}</span>
                             <div class="history-sub">${escapeHtml(subtitle)}</div>
                         </div>
+                        <span class="history-arrow">▾</span>
                     </div>
-                    <p class="history-summary">${escapeHtml(a.summary)}</p>
-                    <div class="history-facts">
-                        ⚠️ Flagged: ${counts}<br>
-                        ${high.length ? `🔴 High risk: ${escapeHtml(high.join(", "))}<br>` : ""}
-                        ${a.safe_highlights.length ? `✅ Safe: ${escapeHtml(a.safe_highlights.join(", "))}` : ""}
+                    <div class="history-body">
+                        <p class="history-summary">${escapeHtml(a.summary)}</p>
+                        <div class="history-facts">
+                            ⚠️ Flagged: ${counts}<br>
+                            ${high.length ? `🔴 High risk: ${escapeHtml(high.join(", "))}<br>` : ""}
+                            ${a.safe_highlights.length ? `✅ Safe: ${escapeHtml(a.safe_highlights.join(", "))}` : ""}
+                        </div>
+                        <button type="button" onclick="showHistoryDetails(${index})">Show details</button>
                     </div>
-                    <button type="button" onclick="showHistoryDetails(${index})">Show details</button>
                 </div>`;
+        }
+
+        function toggleHistory(index) {
+            // only one row is open at a time, so the list stays short
+            document.querySelectorAll(".history-card").forEach(card => {
+                card.classList.toggle("open", card.id === `history-${index}` && !card.classList.contains("open"));
+            });
         }
 
         async function loadHistory() {
