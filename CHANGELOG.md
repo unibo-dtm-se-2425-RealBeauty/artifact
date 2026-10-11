@@ -1,3 +1,13 @@
+## [1.4.0](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.3.1...1.4.0) (2026-10-11)
+
+### Features
+
+* show an AI disclaimer under the result (closes [#1](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/issues/1)) ([ae82734](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/ae82734ca151ad2deaafe74785918bd5ee072c89))
+
+### Documentation
+
+* describe saved results and the history in the README ([a0cd808](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/commit/a0cd8083e53edc98a6110abc0751451b41c2af83))
+
 ## [1.3.1](https://github.com/unibo-dtm-se-2425-RealBeauty/artifact/compare/1.3.0...1.3.1) (2026-10-10)
 
 ### Bug Fixes
