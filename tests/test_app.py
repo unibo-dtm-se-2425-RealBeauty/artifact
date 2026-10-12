@@ -31,6 +31,7 @@ def test_index_returns_page():
     response = make_client().get("/")
     assert response.status_code == 200
 
+
 def test_index_shows_ai_disclaimer():
     response = make_client().get("/")
     assert "not medical advice" in response.get_data(as_text=True)
@@ -77,6 +78,48 @@ def test_analyze_barcode_not_found_returns_404(mock_product):
     response = make_client().post("/api/v1/analyze", json={"barcode": "000"})
     assert response.status_code == 404
     assert response.get_json()["error"] == "not_found"
+
+
+@patch("artifact.app.save_analysis")
+@patch("artifact.app.analyze_ingredients", return_value=FAKE_RESULT)
+@patch(
+    "artifact.app.get_product_by_barcode",
+    return_value={
+        "name": "Soap",
+        "brand": "Acme",
+        "ingredients_text": "Aqua, Glycerin",
+    },
+)
+def test_barcode_found_wins_over_typed_ingredients(
+    mock_product, mock_analyze, mock_save
+):
+    response = make_client().post(
+        "/api/v1/analyze", json={"barcode": "123", "ingredients": "Aqua, Parfum"}
+    )
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["product_name"] == "Soap"
+    mock_analyze.assert_called_once_with(
+        "Aqua, Glycerin"
+    )  # uses barcode ingredients, not typed ones
+
+
+@patch("artifact.app.save_analysis")
+@patch("artifact.app.analyze_ingredients", return_value=FAKE_RESULT)
+@patch(
+    "artifact.app.get_product_by_barcode",
+    return_value=None,
+)
+def test_typed_ingredients_used_when_barcode_not_found(
+    mock_product, mock_analyze, mock_save
+):
+    response = make_client().post(
+        "/api/v1/analyze", json={"barcode": "123", "ingredients": "Aqua, Parfum"}
+    )
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["product_name"] == "Manual Entry"
+    mock_analyze.assert_called_once_with("Aqua, Parfum")
 
 
 @patch("artifact.app.analyze_ingredients", side_effect=RuntimeError("boom"))
