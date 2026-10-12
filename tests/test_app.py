@@ -31,6 +31,10 @@ def test_index_returns_page():
     response = make_client().get("/")
     assert response.status_code == 200
 
+def test_index_shows_ai_disclaimer():
+    response = make_client().get("/")
+    assert "not medical advice" in response.get_data(as_text=True)
+
 
 def test_analyze_without_input_returns_400():
     response = make_client().post("/api/v1/analyze", json={})
